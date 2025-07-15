@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作资料库 - 健筛通医务人员端</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: #f7f8fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 头部 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 20px 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .back-btn {
+            font-size: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            display: inline-block;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* 搜索栏 */
+        .search-section {
+            padding: 20px;
+            background: white;
+            margin-top: -15px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            z-index: 3;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.05);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8f9ff;
+            border-radius: 25px;
+            padding: 12px 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            font-size: 18px;
+            color: #999;
+            margin-right: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        /* 分类标签 */
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 20px;
+            background: white;
+            overflow-x: auto;
+        }
+
+        .category-tab {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .category-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .category-tab:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            padding: 20px;
+            background: #f7f8fa;
+        }
+
+        .category-section {
+            margin-bottom: 30px;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-icon {
+            width: 4px;
+            height: 20px;
+            border-radius: 2px;
+        }
+
+        .training-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .tools-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .assessment-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .resources-icon { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+        .resource-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .resource-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            background: var(--bg-color);
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .card-url {
+            background: #f8f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e8ecf7;
+        }
+
+        .url-label {
+            font-size: 12px;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .url-text {
+            font-size: 13px;
+            color: #333;
+            font-family: 'Monaco', 'Consolas', monospace;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .action-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .secondary-btn {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .secondary-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .qr-section {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e8ecf7;
+        }
+
+        .qr-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .qr-placeholder {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #999;
+        }
+
+        .qr-desc {
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .nav-text {
+            font-size: 12px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 414px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .main-content {
+                padding: 15px;
+                margin-bottom: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="header-content">
+                <div class="back-btn" onclick="goBack()">← 返回</div>
+                <h1>工作资料库</h1>
+                <p>专业工具与学习资源集合</p>
+            </div>
+        </div>
+
+        <!-- 搜索栏 -->
+        <div class="search-section">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="搜索资源..." onkeyup="searchResources(this.value)">
+            </div>
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="category-tabs">
+            <div class="category-tab active" onclick="showCategory('all')">全部</div>
+            <div class="category-tab" onclick="showCategory('training')">培训学习</div>
+            <div class="category-tab" onclick="showCategory('tools')">工作工具</div>
+            <div class="category-tab" onclick="showCategory('assessment')">评估工具</div>
+            <div class="category-tab" onclick="showCategory('resources')">资源库</div>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="main-content">
+            <!-- 培训学习类 -->
+            <div class="category-section" data-category="training">
+                <div class="category-title">
+                    <div class="category-icon training-icon"></div>
+                    📚 培训学习
+                </div>
+                <div class="resource-grid">
+                    <div class="resource-card" style="--accent-color: #4facfe; --bg-color: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">🎓</div>
+                            <div class="card-info">
+                                <div class="card-title">医务人员专业培训</div>
+                                <div class="card-desc">专为医务人员设计的筛查知识培训平台，包含流行病学、技术规范、质量控制等</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">专业培训</span>
+                            <span class="tag">技术规范</span>
+                            <span class="tag">在线测试</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/crc-screening-knowledge/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">开始培训</button>
+                            <button class="action-btn secondary-btn">下载证书</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #ffa726; --bg-color: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">💬</div>
+                            <div class="card-info">
+                                <div class="card-title">沟通技能培训系统</div>
+                                <div class="card-desc">全面的医患沟通技巧培训，包含建立信任、倾听技巧、疑虑回应等实用方法</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">沟通技巧</span>
+                            <span class="tag">情景模拟</span>
+                            <span class="tag">标准话术</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/complete-communication/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">技能培训</button>
+                            <button class="action-btn secondary-btn">话术库</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #ff9800; --bg-color: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">🏥</div>
+                            <div class="card-info">
+                                <div class="card-title">结肠镜检查准备指导</div>
+                                <div class="card-desc">详细的结肠镜检查前准备指导，包含饮食、用药、心理准备等全面指导</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">检查准备</span>
+                            <span class="tag">清单指导</span>
+                            <span class="tag">视频演示</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/colonoscopy-preparation-guide/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">查看指导</button>
+                            <button class="action-btn secondary-btn">打印清单</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #42a5f5; --bg-color: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">📚</div>
+                            <div class="card-info">
+                                <div class="card-title">筛查知识学习指南</div>
+                                <div class="card-desc">全面的结直肠癌筛查知识库，包含基础知识、筛查方法、价值展示等图文视频内容</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">图文并茂</span>
+                            <span class="tag">视频教学</span>
+                            <span class="tag">居民教育</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/colorectal-cancer-screening-guide/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">开始学习</button>
+                            <button class="action-btn secondary-btn">分享给居民</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 工作工具类 -->
+            <div class="category-section" data-category="tools">
+                <div class="category-title">
+                    <div class="category-icon tools-icon"></div>
+                    🛠️ 工作工具
+                </div>
+                <div class="resource-grid">
+                    <div class="resource-card" style="--accent-color: #43e97b; --bg-color: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">📝</div>
+                            <div class="card-info">
+                                <div class="card-title">每日工作记录系统</div>
+                                <div class="card-desc">标准化的医务人员工作记录平台，支持工作量统计和效果分析</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">工作记录</span>
+                            <span class="tag">数据统计</span>
+                            <span class="tag">效果分析</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/daily-work-record/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">记录工作</button>
+                            <button class="action-btn secondary-btn">查看统计</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #66bb6a; --bg-color: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">🎨</div>
+                            <div class="card-info">
+                                <div class="card-title">健康教育素材库</div>
+                                <div class="card-desc">丰富的健康宣教素材，包含宣传海报、折页、视频等多媒体材料</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">宣教素材</span>
+                            <span class="tag">多媒体</span>
+                            <span class="tag">可下载</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/health-education/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">素材库</button>
+                            <button class="action-btn secondary-btn">下载素材</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #ab47bc; --bg-color: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">💪</div>
+                            <div class="card-info">
+                                <div class="card-title">健康生活方式指导</div>
+                                <div class="card-desc">个性化的健康生活建议推荐系统，包含饮食、运动指导和激励机制</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">生活指导</span>
+                            <span class="tag">个性推荐</span>
+                            <span class="tag">激励机制</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/crc-lifestyle-guidance-improved/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">健康指导</button>
+                            <button class="action-btn secondary-btn">制定计划</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #9c27b0; --bg-color: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">🔍</div>
+                            <div class="card-info">
+                                <div class="card-title">筛查障碍智能识别</div>
+                                <div class="card-desc">基于CFIR研究成果的智能障碍识别工具，自动匹配个性化解决方案</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">CFIR框架</span>
+                            <span class="tag">智能匹配</span>
+                            <span class="tag">解决方案</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/CRCS-barrier-solutions/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">识别障碍</button>
+                            <button class="action-btn secondary-btn">解决方案</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 评估工具类 -->
+            <div class="category-section" data-category="assessment">
+                <div class="category-title">
+                    <div class="category-icon assessment-icon"></div>
+                    📊 评估工具
+                </div>
+                <div class="resource-grid">
+                    <div class="resource-card" style="--accent-color: #e57373; --bg-color: linear-gradient(135deg, #e57373 0%, #ef5350 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-info">
+                                <div class="card-title">APCS风险评估工具</div>
+                                <div class="card-desc">基于修订版APCS量表，自动计算个人结直肠癌患病风险，生成可视化风险评估报告</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">智能算法</span>
+                            <span class="tag">风险评估</span>
+                            <span class="tag">可视化报告</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/apcs-colorectal-cancer-assessment/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">打开工具</button>
+                            <button class="action-btn secondary-btn">复制链接</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #f06292; --bg-color: linear-gradient(135deg, #f06292 0%, #ec407a 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">🤖</div>
+                            <div class="card-info">
+                                <div class="card-title">筛查行为倾向预测</div>
+                                <div class="card-desc">基于随机森林机器学习模型（AUC=0.873），自动预测用户筛查行为倾向并分层</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">机器学习</span>
+                            <span class="tag">行为预测</span>
+                            <span class="tag">智能分层</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/CRC-Screening-Behavioral-Propensity-Assessment/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">开始预测</button>
+                            <button class="action-btn secondary-btn">查看算法</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+
+                    <div class="resource-card" style="--accent-color: #ff7043; --bg-color: linear-gradient(135deg, #ff7043 0%, #f4511e 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">📋</div>
+                            <div class="card-info">
+                                <div class="card-title">基线信息评估问卷</div>
+                                <div class="card-desc">问卷星标准化问卷，收集居民基础信息、健康状况、筛查史等多维度数据</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">标准问卷</span>
+                            <span class="tag">基线数据</span>
+                            <span class="tag">在线填写</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">www.wjx.cn/vm/PwmY7T5.aspx</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">打开问卷</button>
+                            <button class="action-btn secondary-btn">查看数据</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 资源库类 -->
+            <div class="category-section" data-category="resources">
+                <div class="category-title">
+                    <div class="category-icon resources-icon"></div>
+                    📁 资源库
+                </div>
+                <div class="resource-grid">
+                    <div class="resource-card" style="--accent-color: #29b6f6; --bg-color: linear-gradient(135deg, #29b6f6 0%, #0288d1 100%);">
+                        <div class="card-header">
+                            <div class="card-icon">📄</div>
+                            <div class="card-info">
+                                <div class="card-title">实用工作指南</div>
+                                <div class="card-desc">专业、高效、精准的筛查指导手册，包含I-SAM五阶段工作流程和操作检查清单</div>
+                            </div>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">工作指南</span>
+                            <span class="tag">操作流程</span>
+                            <span class="tag">检查清单</span>
+                        </div>
+                        <div class="card-url">
+                            <div class="url-label">🌐 访问地址</div>
+                            <div class="url-text">bing-zi-shi.github.io/work-guide/</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn">查看指南</button>
+                            <button class="action-btn secondary-btn">下载PDF</button>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-title">📱 扫码访问</div>
+                            <div class="qr-placeholder">📱</div>
+                            <div class="qr-desc">手机扫码或输入网址访问</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-text">首页</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">📚</div>
+                <div class="nav-text">学习</div>
+            </div>
+            <div class="nav-item active">
+                <div class="nav-icon">📁</div>
+                <div class="nav-text">资源</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">💬</div>
+                <div class="nav-text">消息</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">👤</div>
+                <div class="nav-text">我的</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 返回功能
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                alert('返回上一页');
+            }
+        }
+
+        // 搜索功能
+        function searchResources(query) {
+            const cards = document.querySelectorAll('.resource-card');
+            const searchQuery = query.toLowerCase();
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (searchQuery === '' || text.includes(searchQuery)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 分类切换
+        function showCategory(category) {
+            // 更新标签状态
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 显示/隐藏分类内容
+            const sections = document.querySelectorAll('.category-section');
+            sections.forEach(section => {
+                if (category === 'all' || section.dataset.category === category) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        // 复制链接功能
+        function copyLink(url) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('链接已复制到剪贴板');
+                });
+            } else {
+                // 备用方案
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('链接已复制到剪贴板');
+            }
+        }
+
+        // 显示提示
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #4caf50;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-size: 14px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(76,175,80,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.resource-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // 添加点击复制链接功能
+            document.querySelectorAll('.url-text').forEach(urlElement => {
+                urlElement.addEventListener('click', function() {
+                    copyLink(this.textContent);
+                });
+                urlElement.style.cursor = 'pointer';
+            });
+        });
+
+        // 为所有按钮添加点击效果
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+                
+                // 根据按钮文本执行相应操作
+                const buttonText = this.textContent;
+                if (buttonText.includes('复制')) {
+                    const url = this.closest('.resource-card').querySelector('.url-text').textContent;
+                    copyLink(url);
+                } else {
+                    showToast(`${buttonText} 功能已触发`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+                
